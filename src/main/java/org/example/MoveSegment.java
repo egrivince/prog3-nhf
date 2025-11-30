@@ -1,7 +1,9 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MoveSegment {
     private List<Tile> tiles;
@@ -39,6 +41,20 @@ public class MoveSegment {
 
         return true;
     }*/
+    public Set<Set<Tile>> tilePairs() {
+        Set<Set<Tile>> tilePairsList = new HashSet<>();
+        int size = tiles.size();
+        if(size <= 1) return tilePairsList;
+        for(int i=0; i<size-1; i++) {
+            Tile first = tiles.get(i);
+            Tile second = tiles.get(i+1);
+            tilePairsList.add(new HashSet<>(Set.of(first, second)));
+        }
+        return tilePairsList;
+
+    }
+
+
     public boolean isTilesEmpty() {
         return tiles.isEmpty();
     }

@@ -36,10 +36,17 @@ public final class GuiMainFrame extends JFrame{
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
         sidePanel.setBackground(Params.BOARDCOLOR);
         sidePanel.setPreferredSize(new Dimension(Params.SIDEPANEL_WIDTH,Params.HEIGHT+2*Params.BORDERSIZE));
-        GameButton newGameButton = new GameButton("New Game");
-        newGameButton.addActionListener( actionEvent -> guiListener.newGamePressed() );
-        newGameButton.setAlignmentX(0.5f);
-        sidePanel.add(newGameButton);
+
+        GameButton newGameButton_PvP = new GameButton("New Game (Player vs Player)");
+        newGameButton_PvP.addActionListener( actionEvent -> guiListener.newGamePvPPressed() );
+        sidePanel.add(newGameButton_PvP);
+        GameButton newGameButton_PvAi = new GameButton("New Game (Player vs Ai");
+        newGameButton_PvAi.addActionListener( actionEvent -> guiListener.newGamePvAiPressed() );
+        sidePanel.add(newGameButton_PvAi);
+        GameButton newGameButton_AivAi = new GameButton("New Game (Ai vs Ai");
+        newGameButton_AivAi.addActionListener( actionEvent -> guiListener.newGameAivAiPressed() );
+        sidePanel.add(newGameButton_AivAi);
+
         logArea = new JTextArea(10, 30); //rows, 30 long
         logArea.setEditable(false);
         logArea.setLineWrap(true);

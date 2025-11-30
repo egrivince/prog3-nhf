@@ -5,5 +5,7 @@ public interface GuiListener {
     public void tileDrag(Pos pos);
     public void mouseDragReleased();
     public void failedMouseDragRelease();
-    public void newGamePressed();
+    public void newGamePvPPressed();
+    public void newGamePvAiPressed();
+    public void newGameAivAiPressed();
 }

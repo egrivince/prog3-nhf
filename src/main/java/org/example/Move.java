@@ -22,6 +22,16 @@ public class Move {
         this.tilePairsList = new ArrayList<>();
     }
 
+    public boolean isValidFinal() {
+        if(!isValid()) return false;
+        //check if the move ends on an empty tile or there was a knocked tile
+        if(knockTile == null && getLastMoveSegment().getLastTile().getPiece() != null) {
+            System.out.println("you cant end the move on a tile, you have to move again");
+            return false;
+        }
+        return true;
+    }
+
     public boolean isValid() {
         if(piece == null) return false;
         for(MoveSegment moveSegment : moveSegmentList) {
@@ -41,6 +51,7 @@ public class Move {
             }
         }
         //check if the player is moving a piece on their active row is in gamemanager, not here
+        
 
         //check if you go through 2 tiles  multiple times in a move
         Set<Set<Tile>> tilePairSet = new HashSet<>(tilePairsList);
@@ -125,6 +136,14 @@ public class Move {
 
     }
 
+    public void addAllMovesegments(List<MoveSegment> moveSegmentsList) {
+        for(MoveSegment moveSegment : moveSegmentsList) {
+            startNewSegment();
+            for(Tile tile : moveSegment.getTiles()) {
+                addTileToLast(tile);
+            }
+        }
+    }
     
 
     public void setPiece(Piece piece) {
@@ -154,4 +173,13 @@ public class Move {
             System.out.println("");
         }*/
     }
+    public void printMove() {
+        for(MoveSegment ms : moveSegmentList) {
+            for(Tile t : ms.getTiles()) {
+                System.out.print(t+"_");
+            }
+            System.out.println("");
+        }
+    }
+
 }

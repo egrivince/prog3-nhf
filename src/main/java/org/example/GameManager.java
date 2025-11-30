@@ -1,7 +1,10 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import javax.swing.text.StyledEditorKit;
 
 public class GameManager implements GuiListener {
     private GameListener gameListener;
@@ -12,7 +15,7 @@ public class GameManager implements GuiListener {
     private Board board;
     private Move currentMove;
     private Player currentPlayer;
-    private boolean aiMode = false;
+    private GameMode gameMode = GameMode.P_vs_P;
     private boolean gameOver;
     
     public GameManager() {
@@ -32,16 +35,63 @@ public class GameManager implements GuiListener {
         gameListener.startNewDrag();
         gameListener.boardChanged(board);
 
+        if(gameMode == GameMode.Ai_vs_Ai) {
+            new Thread(() -> {
+                while (true) { 
+                    
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {}
+                    ThinkingMachine thinkingMachineBottom = new ThinkingMachine(board, Player.BOTTOM);
+                    currentMove = thinkingMachineBottom.getBestMove();
+                    executeAiMove();
+                    currentMove = null;
+                    currentPlayer = nextPlayer(); //change the currentplayer to the other
+                    if(manageWin()) break;
+    
+    
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {}
+                    ThinkingMachine thinkingMachineTop = new ThinkingMachine(board, Player.TOP);
+                    currentMove = thinkingMachineTop.getBestMove();
+                    executeAiMove();
+                    currentMove = null;
+                    currentPlayer = nextPlayer(); //change the currentplayer to the other
+                    if(manageWin()) break;
+                }
+            }).start();
 
-        ThinkingMachine tm = new ThinkingMachine(board);
-        List<MoveSegment> l = tm.legalMoveSegments(board.getTile(Pos.at(0,3)).getPiece());
+        }
+
+
+
+        /*ThinkingMachine tm = new ThinkingMachine(board);
+        List<MoveSegment> l = tm.legalMoveSegments(board.getTile(Pos.at(0,3)).getPiece(), new HashSet<>());
         for(MoveSegment ms : l) {
             for(Tile t : ms.getTiles()) {
                 System.out.print(t+"_");
             }
-            System.out.println("new");
-        }
+            System.out.println("");
+        }*/
         
+    }
+
+    public boolean manageWin() {
+        Player winnerPlayer = checkWin();
+        if(winnerPlayer != null) {
+            if(winnerPlayer == Player.BOTTOM) {
+                System.out.println("BOTTOM WINS!");
+                gameListener.logMessage("BOTTOM WINS!");
+            }
+            else if(winnerPlayer == Player.TOP) {
+                System.out.println("TOP WINS!");
+                gameListener.logMessage("TOP WINS!");
+            }
+            gameOver = true;
+            return true;
+        }
+        return false;
     }
 
     public Player checkWin() {
@@ -61,24 +111,26 @@ public class GameManager implements GuiListener {
         else return Player.BOTTOM;
     }
 
-    public void nextMove() { //if its player vs player just 
-        if(!aiMode) {
+    public void nextTurn() { //if its player vs player 
+        if(gameMode == GameMode.P_vs_P) {
             currentMove = null;
             currentPlayer = nextPlayer(); //change the currentplayer to the other
         }
-        else {
-            ThinkingMachine thinkingMachine = new ThinkingMachine(board);
+        else { //Player vs Ai
+            currentPlayer = nextPlayer(); //change the currentplayer to the other
+            ThinkingMachine thinkingMachine = new ThinkingMachine(board, Player.TOP);
             currentMove = thinkingMachine.getBestMove();
-            executeMove();
+            executeAiMove();
             currentMove = null;
             currentPlayer = nextPlayer(); //change the currentplayer to the other
         }
     }
-    
 
     public void executeMove() {
-        if(!currentMove.isValid()) { //this valid check doesnt execute at all i think, executeMove only gets called when the move is already checked
+        if(!currentMove.isValidFinal()) { //this valid check doesnt execute at all i think, executeMove only gets called when the move is already checked
             System.out.println("NOT VALID MOVE!");
+            gameListener.logMessage("invalid ai move");
+            currentMove.printMove();
             currentMove = null;
             gameListener.startNewDrag();
             //gameListener.boardChanged(board);
@@ -106,25 +158,46 @@ public class GameManager implements GuiListener {
             board.movePiece(currentMove.getPiece(), endTile);
             board.movePiece(tempTile.getPiece(), currentMove.getKnockTile());
         }
+        
+        Player winnerPlayer = checkWin();
+        if(winnerPlayer != null) {
+            if(winnerPlayer == Player.BOTTOM) {
+                System.out.println("BOTTOM WINS!");
+                gameListener.logMessage("BOTTOM WINS!");
+            }
+            else if(winnerPlayer == Player.TOP) {
+                System.out.println("TOP WINS!");
+                gameListener.logMessage("TOP WINS!");
+            }
+            gameOver = true;
+        }
+
         board.print();
         //currentMove.debuglists();
         gameListener.boardChanged(board);
         gameListener.setActiveRow(nextPlayer(), board.activeRow(nextPlayer()));
         gameListener.setActiveRow(currentPlayer, board.activeRow(currentPlayer));
-        gameListener.setTriangleColors(nextPlayer());
-
-        Player winnerPlayer = checkWin();
-        if(winnerPlayer != null) {
-            if(winnerPlayer == Player.BOTTOM) {
-                System.out.println("BOTTOM WINS!");
-            }
-            else if(winnerPlayer == Player.TOP) {
-                System.out.println("TOP WINS!");
-            }
-            gameOver = true;
+        if(!gameOver) {
+            gameListener.setTriangleColors(nextPlayer());
         }
 
-        nextMove(); // set currentmove to null, change players, make the ai move
+        //manageTurn() calls executeMove and then nextTurn, no need for it here
+    }
+
+    public void executeAiMove() {
+        gameListener.setLineColors(currentPlayer);
+        for(MoveSegment moveSegment : currentMove.getMoveSegmentList()) {
+            gameListener.startNewDrag();
+            for(Tile tile : moveSegment.getTiles()) {
+                gameListener.addTileDragged(tile.getPos());
+            }
+        }
+        executeMove();
+    }
+
+    public void manageTurn() {
+        executeMove();
+        if(!gameOver) nextTurn();
     }
     
     //
@@ -159,7 +232,7 @@ public class GameManager implements GuiListener {
         }
         currentMove.addKnockTile(board.getTile(pos));
         currentMove.getMoveSegmentList().removeLast(); //have to remove it bc when you released the mouse it added an empty new segment that waits to be filled but messes up the valid check
-        executeMove();
+        manageTurn();
     }
 
     @Override
@@ -237,12 +310,12 @@ public class GameManager implements GuiListener {
         }
         
         if(currentMove.getLastMoveSegment().getLastTile().getPiece() == null) { //if the last tile was empty
-            executeMove();
+            manageTurn();
             
         }
         else { //if there was already a piece on the last tile
             if(currentMove.getPiece().getTile() == currentMove.getLastMoveSegment().getLastTile()) { //if the piece looped back to its original place, it doesnt count as a tile with a piece on it
-                executeMove();
+                manageTurn();
                 System.out.println("looped back");
                 gameListener.logMessage("looped back");
             }
@@ -263,10 +336,22 @@ public class GameManager implements GuiListener {
     }
 
     @Override
-    public void newGamePressed() {
+    public void newGamePvPPressed() {
+        gameMode = GameMode.P_vs_P;
         newGame();
     }
     
+    @Override
+    public void newGamePvAiPressed() {
+        gameMode = GameMode.P_vs_Ai;
+        newGame();
+    }
+
+    @Override
+    public void newGameAivAiPressed() {
+        gameMode = GameMode.Ai_vs_Ai;
+        newGame();
+    }
 
 
 }

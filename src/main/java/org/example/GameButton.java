@@ -27,6 +27,7 @@ public class GameButton extends JButton {
         setBorderPainted(false);
         setBackground(Params.BUTTON_NORMAL);
         setFont(Params.BUTTON_FONT);
+        setAlignmentX(0.5f);
 
         addMouseListener(new MouseAdapter() {
             @Override
