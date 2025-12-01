@@ -1,6 +1,8 @@
 package org.example;
 
-public class Piece {
+import java.io.Serializable;
+
+public class Piece implements Serializable{
     private int type; //1,2,3
     private Tile tile;
 

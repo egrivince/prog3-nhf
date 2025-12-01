@@ -1,8 +1,9 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Board implements BoardReadOnly{
+public class Board implements BoardReadOnly, Serializable{
     private List<List<Tile>> board;
     private Tile bottomGoalTile;
     private Tile topGoalTile;

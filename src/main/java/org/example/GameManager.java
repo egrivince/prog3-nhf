@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class GameManager implements GuiListener, Serializable{
-    private GameListener gameListener;
+    private transient GameListener gameListener;
     public void setgameListener(GameListener l) {
         gameListener = l;
     }
@@ -22,19 +22,26 @@ public class GameManager implements GuiListener, Serializable{
         
     }
 
-    public void newGame() {
-        System.out.println("new game started");
-        board = new Board();
-        board.boardStartPosition();
-        board.print();
-        currentPlayer = Player.BOTTOM;
-        currentMove = null;
-        gameOver = false;
+    public void gameStart() {
         gameListener.setActiveRow(Player.BOTTOM, 5); //bottom player;
         gameListener.setActiveRow(Player.TOP, 0); //top player;
         gameListener.setTriangleColors(currentPlayer);
         gameListener.startNewDrag();
         gameListener.boardChanged(board);
+        currentMove = null;
+        board.print();
+        
+    }
+
+    public void newGame() {
+        System.out.println("new game started");
+        board = new Board();
+        board.boardStartPosition();
+        
+        currentPlayer = Player.BOTTOM;
+        gameOver = false;
+        
+        gameStart();
 
         if(gameMode == GameMode.Ai_vs_Ai) {
             new Thread(() -> {
@@ -89,7 +96,9 @@ public class GameManager implements GuiListener, Serializable{
         }
         return null;
     }
-    
+    public void setMove(Move move) {
+        this.currentMove = move;
+    }
     public Board getBoard() {
         return board;
     }
@@ -352,6 +361,24 @@ public class GameManager implements GuiListener, Serializable{
     public void newGameAivAiPressed() {
         gameMode = GameMode.Ai_vs_Ai;
         newGame();
+    }
+
+    @Override
+    public GameManager getGameManager() {
+        return this;
+    }
+
+    @Override
+    public void loadGame(GameManager gm) {
+        this.board = gm.board;
+        this.currentPlayer = gm.currentPlayer;
+        this.gameMode = gm.gameMode;
+        this.gameOver = gm.gameOver;
+        this.currentMove = null;
+
+        gameStart();
+        gameListener.logMessage("game loaded successfully from file");
+
     }
 
 

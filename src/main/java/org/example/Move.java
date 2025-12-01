@@ -1,12 +1,13 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
 
-public class Move {
+public class Move implements Serializable{
 
     private List<MoveSegment> moveSegmentList;
     private List<Set<Tile>> tilePairsList;

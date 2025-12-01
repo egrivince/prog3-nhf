@@ -2,7 +2,7 @@ package org.example;
 
 import java.util.List;
 
-public interface GameListener {
+public interface GameListener{
     public void boardChanged(BoardReadOnly board);
     public void boardChanged(BoardReadOnly board, List<Pos> changed);
     public void addTileDragged(Pos pos);

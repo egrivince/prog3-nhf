@@ -8,4 +8,7 @@ public interface GuiListener {
     public void newGamePvPPressed();
     public void newGamePvAiPressed();
     public void newGameAivAiPressed();
+
+    public GameManager getGameManager();
+    public void loadGame(GameManager gm);
 }

@@ -1,8 +1,8 @@
 package org.example;
 
-import java.awt.dnd.DragGestureEvent;
+import java.io.Serializable;
 
-public class Tile {
+public class Tile implements Serializable{
     private Pos pos;
     private Piece piece;
 

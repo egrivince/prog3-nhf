@@ -1,10 +1,11 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Pos {
+public class Pos implements Serializable{
     public static final int TOPGOAL = -1;
     public static final int BOTTOMGOAL = 6;
     public static final int COL_SPEC = -99; //it cant be -1 bc that messes up the left direction method

@@ -50,10 +50,13 @@ public final class GuiMainFrame extends JFrame{
         sidePanel.add(newGameButton_AivAi);
 
         //fileChooser = new JFileChooser("./");
-        fileChooser = new FileChooser();
+        fileChooser = new FileChooser(guiListener);
         GameButton saveGameButton = new GameButton("Save Game");
-        saveGameButton.addActionListener(fileChooser);
+        saveGameButton.addActionListener(actionEvent -> fileChooser.saveGame());
         sidePanel.add(saveGameButton);
+        GameButton loadGameButton = new GameButton("Load Game");
+        loadGameButton.addActionListener(actionEvent -> fileChooser.loadGame());
+        sidePanel.add(loadGameButton);
 
         logArea = new JTextArea(10, 30); //rows, 30 long
         logArea.setEditable(false);

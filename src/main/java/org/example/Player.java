@@ -1,6 +1,6 @@
 package org.example;
 
-public enum Player {
+public enum Player{
     TOP, BOTTOM;
 
     public Player other() {
