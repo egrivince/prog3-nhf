@@ -4,15 +4,14 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import javax.swing.JFileChooser;
 
-import com.viaoa.image.jpg.JFIFInputStream;
-
+/**
+ * Manages the saving and loading of games.
+ */
 public class FileChooser extends JFileChooser{
     GuiListener guiListener;
 
@@ -21,7 +20,10 @@ public class FileChooser extends JFileChooser{
         guiListener = l;
     }   
 
-    
+    /**
+     * Manages the game saving.
+     * Writes the gamemanager object to the selected file to read later.
+     */
     public void saveGame() {
         int option = this.showSaveDialog(null);
         
@@ -43,6 +45,10 @@ public class FileChooser extends JFileChooser{
         }
     }
 
+    /**
+     * Manages the game loading.
+     * Reads the gamemanager object and calls gamemanager's loadgame.
+     */
     public void loadGame() {
         int option = this.showOpenDialog(null);
 

@@ -1,5 +1,9 @@
 package org.example;
 
+/**
+ * The listener class of the gui.
+ * These methods are called and passed to the gamemanager if there is a gui event, like mouse events or a button being pressed.
+ */
 public interface GuiListener {
     public void clickedOnTile(Pos pos);
     public void tileDrag(Pos pos);

@@ -7,14 +7,26 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**Manages the ai's decision making. */
 public class ThinkingMachine {
+    /**The state of the board when making the decision. */
     private BoardReadOnly board;
+    /**The active row of the player making the move. */
     private int activeRow;
+    /**The player makng the move that is being played by the ai. */
     private Player player;
+    /**A list of moves that end on one tile ahead of the active row.
+     * If there is no winning move, the ai tries to play one of these.
+     */
     private List<Move> okayMoves;
+    /**
+     * A List of all legal moves.
+     */
     private List<Move> allMoves;
 
-
+    /**Constructor, sets the board and the player.
+     * Calculates the active row.
+     */
     public ThinkingMachine(BoardReadOnly board, Player player) {
         this.board = board;
         this.player = player;
@@ -23,6 +35,11 @@ public class ThinkingMachine {
         allMoves = new ArrayList<>();
     }
 
+    /**Returns the final decision of the ai.
+     * If there is a winning move, that is the return value.
+     * If not, it tries to find an okay move.
+     * If there are no okay moves, it just returns a random legal move.
+     */
     public Move getBestMove() {
         Move possibleWinMove = winMoveFinal(); //this also fills up okaymoves
         if(possibleWinMove != null) return possibleWinMove; //if its null just go ahead with a random move from okaymoves
@@ -39,14 +56,16 @@ public class ThinkingMachine {
         }
     }
 
-    
 
-    /*public Piece getRandomPiece() {
-        int randomIdx = new Random().nextInt(board.activeRowPieces(player).size());
-        Piece randomPiece = board.activeRowPieces(player).get(randomIdx);
-        return randomPiece;
-    }*/
-
+    /**
+     * Returns a list of all legal movesegments from a given tile.
+     * Considers the set of tile pairs that it can't pass through.
+     * Considers the start piece of the move(not the movesegment!) that doesnt actually count as occupied.
+     * Calls the recursive function legalMoveSegmentsRecursive()
+     * @param piece the piece that started the move, not neccesarily at the start tile.
+     * @param startTile the tile the movesegment has to start on.
+     * @param tilePairs the set of tile pairs that the movesegment cant pass through (from the move's other movesegments before).
+     */
     public List<MoveSegment> legalMoveSegments(Piece piece, Tile startTile, Set<Set<Tile>> tilePairs) {
         List<MoveSegment> start = new ArrayList<>();
         MoveSegment moveSegment = new MoveSegment();
@@ -56,6 +75,12 @@ public class ThinkingMachine {
         return legalMoveSegmentsRecursive(piece, start, tilePairs);
     }
 
+    /**
+     *  The recursive part of legalMoveSegments()
+     * @param piece the piece that started the move, not neccesarily at the start tile.
+     * @param current the current list of movesegments, not neccessarily the right size, in contruction.
+     * @param moveTilePairs the set of tile pairs that the movesegment cant pass through (from the move's other movesegments before).
+     */ 
     public List<MoveSegment> legalMoveSegmentsRecursive(Piece piece, List<MoveSegment> current, Set<Set<Tile>> moveTilePairs) {
         if(current.isEmpty()) { //if current is empty there is a dead end, no legal moves
             return new ArrayList<>();
@@ -96,6 +121,10 @@ public class ThinkingMachine {
         return legalMoveSegmentsRecursive(piece, newMoveSegmentList, moveTilePairs);
     }
 
+    /**
+     * Checks for any winning moves.
+     * Call the recursive winMoveRecursive() function.
+     */
     public Move winMoveFinal() {
         List<Piece> activeRowPieces = board.activeRowPieces(player);
         for(Piece piece : activeRowPieces) {
@@ -109,6 +138,12 @@ public class ThinkingMachine {
         return null;
     }
 
+    /**
+     * The recursive part of winMoveFinal()
+     * Fills up the lists okayMoves and allMoves to be used later in the decision making if there is no winning move.
+     * Returns null if there is no winning move.
+     * @param currentMove the current move that the algorithm tries to get to the endTile.
+     */
     public Move winMoveRecursive(Move currentMove) {
         //calculate start tile
         Tile startTile;

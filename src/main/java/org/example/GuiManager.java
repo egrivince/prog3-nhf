@@ -5,9 +5,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.logging.LogManager;
 
+/**
+ * The main manager class for the gui.
+ * 
+ */
 public final class GuiManager implements GameListener {
     private GuiListener guiListener;
     public void setGuiListener(GuiListener l) {
@@ -20,9 +22,10 @@ public final class GuiManager implements GameListener {
     private final List<List<CellPanel>> cellPanels;
     private final CellPanel topCellPanel;
     private final CellPanel bottomCellPanel;
-
-    //private Map<Coordinate, CellPanel> cellPanelMap;
     
+    /**
+     * Constructor, creates mainframe and the cellpanels and sets their listeners.
+     */
     public GuiManager(GuiListener l) {
         this.setGuiListener(l);
 
@@ -56,6 +59,10 @@ public final class GuiManager implements GameListener {
         mainFrame.setVisible(true);
     }
 
+    /**
+     * Updates the whole board.
+     * Removes and then adds the components of the tiles.
+     */
     @Override
     public void boardChanged(BoardReadOnly board) {
         for(int row=0; row<6; row++) {
@@ -87,6 +94,9 @@ public final class GuiManager implements GameListener {
         }
     }
 
+    /**
+     * Updates the board, but only on the gives positions. 
+     */
     @Override
     public void boardChanged(BoardReadOnly board, List<Pos> changed) {
         for(Pos p : changed) {
@@ -105,7 +115,9 @@ public final class GuiManager implements GameListener {
         }
     }
 
-
+    /**
+     * Extends and redraws the line that tracks the move.
+     */
     @Override
     public void addTileDragged(Pos pos) {
         JPanel cell = getCellPanel(pos);
@@ -117,12 +129,18 @@ public final class GuiManager implements GameListener {
         mainFrame.overPanel.repaint();
     }
 
+    /**
+     * Deletes the line that tracks the move from the screen.
+     */
     @Override
     public void startNewDrag() {
         mainFrame.moveLine.clearPoints();
         mainFrame.overPanel.repaint();
     }
 
+    /**
+     * Makes the starting piece a different color.
+     */
     @Override
     public void moveStarted(Pos pos) { //make the piece label transparent or other color to signal that it is not really there, its the one making the move
         CellPanel cp = getCellPanel(pos);
@@ -132,11 +150,19 @@ public final class GuiManager implements GameListener {
         cp.repaint();
     }
 
+    /**
+     * Adds a new segment to the line that tracks the move.
+     */
     @Override
     public void newDragSegment() {
         mainFrame.moveLine.newLineSegment();
     }
 
+    /**
+     * Manages the looks and positions of the active row triangles.
+     * @param player the player whose triangle to change
+     * @param row the active row of the player
+     */
     @Override
     public void setActiveRow(Player player, int row) { //set the active row pointers for the given player, no color changes
         JPanel cell = getCellPanel(Pos.at(row, 5));
@@ -157,6 +183,10 @@ public final class GuiManager implements GameListener {
         mainFrame.overPanel.repaint();
     }
 
+    /**
+     * Manages the active row triangle colors.
+     * @param player the player whose turn the game is on
+     */
     @Override
     public void setTriangleColors(Player player) {
         
@@ -170,6 +200,10 @@ public final class GuiManager implements GameListener {
         }
     }
 
+    /**
+     * Sets the moveline's color according to the player
+     * @param player the player whose turn the game is on
+     */
     @Override
     public void setLineColors(Player player) {
         if(player == Player.BOTTOM) { //bottom player
@@ -180,6 +214,10 @@ public final class GuiManager implements GameListener {
         }
     }
 
+    /**
+     * Returns a cellpanel at the given position
+     * @param pos the position of the cellpanel
+     */
     public CellPanel getCellPanel(Pos pos) {
         if(pos.col == Pos.COL_SPEC) {
             if(pos.row == Pos.BOTTOMGOAL) return bottomCellPanel;
@@ -188,6 +226,10 @@ public final class GuiManager implements GameListener {
         return cellPanels.get(pos.row).get(pos.col);
     }
 
+    /**
+     * Logs a message in the textarea on the side.
+     * @param message the message that will be logged
+     */
     @Override
     public void logMessage(String message) {
         mainFrame.logArea.append(message+"\n");

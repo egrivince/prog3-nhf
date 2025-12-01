@@ -3,6 +3,10 @@ package org.example;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * The class responsible for the genera loadout of the window.
+ * Manages the swing objects when launching the program.
+ */
 public final class GuiMainFrame extends JFrame{
     private GuiListener guiListener;
     public void setGuiListener(GuiListener l) {
@@ -23,7 +27,9 @@ public final class GuiMainFrame extends JFrame{
     public ActiveRowTriangle topTriangle;
     public ActiveRowTriangle bottomTriangle;
 
-
+    /**
+     * Constructor, sets the layout of the panels and buttons and adds their listeners.
+     */
     public GuiMainFrame(GuiListener l) {
         this.setGuiListener(l);
 

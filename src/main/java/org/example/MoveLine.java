@@ -8,8 +8,12 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
+/**
+ * Manages the line that tracks the move on the screen.
+ */
 public class MoveLine extends JComponent{
     
+    /**A list of list of points that make up the line. */
     private List<List<Point>> segmentList;
     private Color lineColor = new Color(255,0,0,150);
 
@@ -17,17 +21,23 @@ public class MoveLine extends JComponent{
         segmentList = new ArrayList<>();
     }
 
+    /**Adds a point to the line. */
     public void addPoint(Point point) {
         segmentList.getLast().add(point);
     }
+    /**Clears the lines points and starts a new segment. */
     public void clearPoints() {
         segmentList.clear();
         this.newLineSegment();
     }
+    /**Starts a new segment. */
     public void newLineSegment() {
         segmentList.add(new ArrayList<>());
     }
 
+    /**Paints the component on the screen.
+     * Uses a Path2D object, not regular lines.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -62,6 +72,7 @@ public class MoveLine extends JComponent{
         g2d.draw(path);
     }
 
+    /**Setter for the color. */
     public void setColor(Color color) {
         this.lineColor = color;
     }

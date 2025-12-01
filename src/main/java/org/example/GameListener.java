@@ -2,6 +2,10 @@ package org.example;
 
 import java.util.List;
 
+/**
+ * The listener interface of the gamemanager.
+ * Gamemanager overrides and calls these methods when a game event occures.
+ */
 public interface GameListener{
     public void boardChanged(BoardReadOnly board);
     public void boardChanged(BoardReadOnly board, List<Pos> changed);

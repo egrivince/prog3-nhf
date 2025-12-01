@@ -3,11 +3,11 @@ package org.example;
 import java.awt.*;
 import javax.swing.*;
 
-
+/**The class for the JLabels that represent the pieces on the board. */
 public class PieceLabel extends JLabel{
     private int type;
 
-
+    /**Constructor, sets the look and text of the label. */
     public PieceLabel(int type) {
         this.type = type;
 
@@ -21,7 +21,7 @@ public class PieceLabel extends JLabel{
         this.setFocusable(false);
         this.setEnabled(false);
     }
-
+    /**Setter for type. */
     public void setType(int type) {
         this.type = type;
     }

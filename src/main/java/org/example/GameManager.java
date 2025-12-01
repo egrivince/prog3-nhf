@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Manages the game.
+ * Manages turns, executes moves, communicates with the gui.
+ */
 public class GameManager implements GuiListener, Serializable{
     private transient GameListener gameListener;
     public void setgameListener(GameListener l) {
@@ -22,6 +26,10 @@ public class GameManager implements GuiListener, Serializable{
         
     }
 
+    /**
+     * Starts the game.
+     * Doesn't set the board.
+     */
     public void gameStart() {
         gameListener.setActiveRow(Player.BOTTOM, 5); //bottom player;
         gameListener.setActiveRow(Player.TOP, 0); //top player;
@@ -33,6 +41,10 @@ public class GameManager implements GuiListener, Serializable{
         
     }
 
+    /**
+     * Starts a new, empty game.
+     * If the gamemode is ai vs. ai, that also gets managed here.
+     */
     public void newGame() {
         System.out.println("new game started");
         board = new Board();
@@ -70,6 +82,9 @@ public class GameManager implements GuiListener, Serializable{
         
     }
 
+    /**
+     * Checks and manages the win position.
+     */
     public boolean manageWin() {
         Player winnerPlayer = checkWin();
         if(winnerPlayer != null) {
@@ -87,6 +102,9 @@ public class GameManager implements GuiListener, Serializable{
         }
         return false;
     }
+    /**
+     * Checks if a player reached the goal tile.
+     */
     public Player checkWin() {
         if(board.getBottomGoalTile().getPiece() != null) { //if the bottom goal tile is occupied by a piece, top wins
             return Player.TOP;
@@ -96,17 +114,31 @@ public class GameManager implements GuiListener, Serializable{
         }
         return null;
     }
+    /**
+     * Sets the currentmove.
+     * Not used, only for testing.
+     */
     public void setMove(Move move) {
         this.currentMove = move;
     }
+    /**
+     * Returns the board.
+     */
     public Board getBoard() {
         return board;
     }
+    /**
+     * Switches the players.
+     */
     public Player nextPlayer() {
         if(currentPlayer == Player.BOTTOM) return Player.TOP;
         else return Player.BOTTOM;
     }
     
+    /**
+     * Checks if the currentplayer ha no legal moves.
+     * Is not used currently as this is a very specific case that does not occur in a normal scenario. 
+     */
     public boolean noLegalMoves() {
         ThinkingMachine tm = new ThinkingMachine(board, currentPlayer);
         for(Piece piece : board.activeRowPieces(currentPlayer)) {
@@ -118,6 +150,11 @@ public class GameManager implements GuiListener, Serializable{
         return true; //all movesegmentslists are empty, no legal moves, the turn must be passed
     }
 
+    /**
+     * Manages the switch to the next turn.
+     * If the other player is ai, it executes the ai's move
+     * and switches back to the human player.
+     */
     public void nextTurn() { //if its player vs player 
         if(gameMode == GameMode.P_vs_P) {
             currentMove = null;
@@ -133,6 +170,12 @@ public class GameManager implements GuiListener, Serializable{
         }
     }
 
+    /**
+     * Manages the execution of the current move.
+     * Checks if the move is legal one last time.
+     * Moves the piece to the end tile of the move, and manages knocked pieces.
+     * Checks if the piece being moved was on the active row. 
+     */
     public void executeMove() {
         if(!currentMove.isValidFinal()) { //this valid check doesnt execute at all i think, executeMove only gets called when the move is already checked
             System.out.println("NOT VALID MOVE!");
@@ -185,6 +228,11 @@ public class GameManager implements GuiListener, Serializable{
         //manageTurn() calls executeMove and then nextTurn, no need for it here
     }
 
+    /**
+     * Executes the moves of ai players.
+     * Calls the gui to draw the lines and change the colors for the ai's move.
+     * Waits a bit so the move is not instant.
+     */
     public void executeAiMove() {
         System.out.println("-ai: "+currentPlayer);
         currentMove.printMove();
@@ -202,17 +250,18 @@ public class GameManager implements GuiListener, Serializable{
         executeMove();
     }
 
+    /**
+     * Manages the turn.
+     * Only goes to the next turn if the game is not over yet.
+     */
     public void manageTurn() {
         executeMove();
         if(!gameOver) nextTurn();
     }
     
-    //
-    //
-    //
-    //
-    //
-    //mouse listener functions
+    /**
+     * Manages tile clicking, mainly for knocing pieces.
+     */
     @Override
     public void clickedOnTile(Pos pos) {
         if(gameOver) return;
@@ -242,6 +291,11 @@ public class GameManager implements GuiListener, Serializable{
         manageTurn();
     }
 
+    /**
+     * Manages dragging on tiles.
+     * Adds the tile to the current move, calls the gui to draw the lines.
+     * Checks if the drag creates an invalid move.
+     */
     @Override
     public void tileDrag(Pos pos) {
         if(gameOver) return;
@@ -284,6 +338,10 @@ public class GameManager implements GuiListener, Serializable{
         }
     }
 
+
+    /**
+     * Manages dragging on the goal tiles.
+     */
     public void goalTileMouseDrag(Pos pos) {
         //System.out.println("goal tile drag:"+pos.row);
         if(currentMove == null) { //you cant start a move from here
@@ -303,7 +361,10 @@ public class GameManager implements GuiListener, Serializable{
         
     }
 
-    
+    /**
+     * Manages the mouse being released after a drag.
+     * Calls the move execution if the move is valid.
+     */
     @Override
     public void mouseDragReleased() { //row, col doesnt matter, cant detect it, because drag locks the tile
         if(gameOver) return;
@@ -335,6 +396,9 @@ public class GameManager implements GuiListener, Serializable{
         }
     }
 
+    /**
+     * Manages the mouse release if it was invalid.
+     */
     @Override
     public void failedMouseDragRelease() {
         if(currentMove == null) return;
@@ -345,29 +409,46 @@ public class GameManager implements GuiListener, Serializable{
         currentMove = null;
     }
 
+    /**
+     * Creates a new player vs. player game.
+     */
     @Override
     public void newGamePvPPressed() {
         gameMode = GameMode.P_vs_P;
         newGame();
     }
     
+    /**
+     * Creates a new player vs. ai game.
+     */
     @Override
     public void newGamePvAiPressed() {
         gameMode = GameMode.P_vs_Ai;
         newGame();
     }
 
+    /**
+     * Creates a new ai vs. ai game.
+     */
     @Override
     public void newGameAivAiPressed() {
         gameMode = GameMode.Ai_vs_Ai;
         newGame();
     }
 
+    /**
+     * Returns the whole object.
+     * Only for the tests.
+     */
     @Override
     public GameManager getGameManager() {
         return this;
     }
 
+    /**
+     * Loads a game from the given GameManager object.
+     * @param gm the gamemanager object that will be loaded.
+     */
     @Override
     public void loadGame(GameManager gm) {
         this.board = gm.board;

@@ -7,14 +7,26 @@ import java.util.Set;
 import java.util.HashSet;
 
 
+/**
+ * Contains the attributes of a move.
+ */
 public class Move implements Serializable{
 
+    /**a list of the movesegments that make up the move */
     private List<MoveSegment> moveSegmentList;
+    /**a list of pairs of tiles that the piece went through during the move */
     private List<Set<Tile>> tilePairsList;
+    /**the piece that is being moved */
     private Piece piece;
+    /**the tile that the last piece is being knocked to if the move ends with a knock, otherwise null */
     private Tile knockTile;
+    /**the player that makes the move */
     private Player player;
 
+    /**Constructor
+     * @param player the player that makes the move
+     * @param piece the piece that is being moved
+     */
     public Move(Player player, Piece piece) {
         this.player = player;
         this.piece = piece;
@@ -23,6 +35,9 @@ public class Move implements Serializable{
         this.tilePairsList = new ArrayList<>();
     }
 
+    /**
+     * Copy Constructor.
+     */
     public Move(Move other) {
         this.player = other.player;
         this.piece = other.piece;
@@ -31,6 +46,9 @@ public class Move implements Serializable{
         this.tilePairsList = new ArrayList<>(other.tilePairsList);
     }
 
+    /**
+     * Checks if the final move is valid.
+     */
     public boolean isValidFinal() {
         if(!isValid()) return false;
         //check if the move ends on an empty tile or there was a knocked tile
@@ -41,6 +59,9 @@ public class Move implements Serializable{
         return true;
     }
 
+    /**
+     * Checks if the move is valid.
+     */
     public boolean isValid() {
         if(piece == null) return false;
         for(MoveSegment moveSegment : moveSegmentList) {
@@ -103,16 +124,25 @@ public class Move implements Serializable{
 
         return true;
     }
+    /**Returns the piece */
     public Piece getPiece() {
         return piece;
     }
+    
+    /**Returns the list of movesegments */
     public List<MoveSegment> getMoveSegmentList() {
         return moveSegmentList;
     }
+    
+    /**Returns the last movesegment */
     public MoveSegment getLastMoveSegment() {
         if(moveSegmentList.isEmpty()) return null;
         return moveSegmentList.getLast();
     }
+    
+    /**Adds a tile to the last movesegment.
+     * @param tile the tile to add
+     */
     public void addTileToLast(Tile tile) {
         //add tilepair
         
@@ -129,6 +159,9 @@ public class Move implements Serializable{
         
     }
     
+    /**
+     * Starts a new movesegment.
+     */
     public void startNewSegment() {
         MoveSegment lastSegment = getLastMoveSegment(); //null if its the first segment!
 
@@ -146,12 +179,20 @@ public class Move implements Serializable{
 
     }
 
+    /**
+     * Adds all of the movesegments given.
+     * Used by the ai.
+     * @param moveSegmentsList the list of movesegments to add
+     */
     public void addAllMovesegments(List<MoveSegment> moveSegmentsList) {
         for(MoveSegment moveSegment : moveSegmentsList) {
             addMovesegment(moveSegment);
         }
     }
 
+    /**
+     * Adds a single movesegment to the move.
+     */
     public void addMovesegment(MoveSegment moveSegment) {
         startNewSegment();
         for(Tile tile : moveSegment.getTiles()) {
@@ -159,35 +200,41 @@ public class Move implements Serializable{
         }
     }
     
-
+    /**Setter for the piece.*/
     public void setPiece(Piece piece) {
         this.piece = piece;
     }
+    /**Adds a knock tile.
+     * @param tile the knock tile to add
+     */
     public void addKnockTile(Tile tile) {
         this.knockTile = tile;
     }
+    /**Getter for the knock tile. */
     public Tile getKnockTile() {
         return this.knockTile;
     }
+    /**Setter for the player. */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
-    public void debuglists() {
+    /*public void debuglists() {
         for(Set<Tile> tilePair : tilePairsList) {
             for(Tile tile : tilePair) {
                 System.out.print("{"+tile+"}");
             }
             System.out.println("");
         }
-        /*for(MoveSegment ms : moveSegmentList) {
+        for(MoveSegment ms : moveSegmentList) {
             for(Tile t : ms.getTiles()) {
                 System.out.print(t+"-");
             }
             System.out.println("");
-        }*/
-    }
+        }
+    }*/
     
+    /**Prints the move's data to the console for debugging. */
     public void printMove() {
         for(MoveSegment ms : moveSegmentList) {
             ms.printMovesegment();
@@ -195,6 +242,9 @@ public class Move implements Serializable{
         }
     }
 
+    /**
+     * Returns a set of pairs of tiles that the piece moved through during the move.
+     */
     public Set<Set<Tile>> tilePairs() {
         Set<Set<Tile>> tilePairs = new HashSet<>();
         for(MoveSegment moveSegment : moveSegmentList) {
@@ -203,10 +253,12 @@ public class Move implements Serializable{
         return tilePairs;
     }
 
+    /**Returns the position of the end of the move. */
     public Pos to() {
         return getLastMoveSegment().getLastTile().getPos();
     }
 
+    /**Returns the start position of the move. */
     public Pos from() {
         return moveSegmentList.getFirst().getTiles().getFirst().getPos();
     }

@@ -3,6 +3,10 @@ package org.example;
 import java.awt.Color;
 import java.awt.Font;
 
+/**
+ * Manages and contains the parameters neccessary for setting up the gui.
+ * Contains static final variables that describe sizes, colors, fonts.
+ */
 public class Params {
     
     //you cant instantiate this class

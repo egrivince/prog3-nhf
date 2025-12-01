@@ -9,10 +9,14 @@ import java.awt.RenderingHints;
 
 import javax.swing.JComponent;
 
+
+/**
+ * Manages a triangle that shows the active row of a player.
+ */
 public class ActiveRowTriangle extends JComponent{
 
     private Point tip;
-    Color triangleColor = Color.BLACK;
+    private Color triangleColor = Color.BLACK;
 
     public ActiveRowTriangle(Point tip) {
         this.tip = tip;
@@ -21,6 +25,9 @@ public class ActiveRowTriangle extends JComponent{
         this.tip = tip;
     }
 
+    /**
+     * Paints the triangle at the tip point.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -39,6 +46,9 @@ public class ActiveRowTriangle extends JComponent{
         g2d.fill(triangle);
     }
 
+    /**
+     * Sets the color of the triangle.
+     */
     public void setColor(Color color) {
         this.triangleColor = color;
     }
