@@ -17,6 +17,7 @@ public final class GuiMainFrame extends JFrame{
     public CellPanel topGoalPanel;
     public CellPanel bottomGoalPanel;
     public JTextArea logArea;
+    public FileChooser fileChooser;
 
     public MoveLine moveLine;
     public ActiveRowTriangle topTriangle;
@@ -36,6 +37,7 @@ public final class GuiMainFrame extends JFrame{
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
         sidePanel.setBackground(Params.BOARDCOLOR);
         sidePanel.setPreferredSize(new Dimension(Params.SIDEPANEL_WIDTH,Params.HEIGHT+2*Params.BORDERSIZE));
+        sidePanel.setBorder(BorderFactory.createEmptyBorder(Params.BORDERSIZE, Params.BORDERSIZE, Params.BORDERSIZE, Params.BORDERSIZE));
 
         GameButton newGameButton_PvP = new GameButton("New Game (Player vs Player)");
         newGameButton_PvP.addActionListener( actionEvent -> guiListener.newGamePvPPressed() );
@@ -46,6 +48,12 @@ public final class GuiMainFrame extends JFrame{
         GameButton newGameButton_AivAi = new GameButton("New Game (Ai vs Ai");
         newGameButton_AivAi.addActionListener( actionEvent -> guiListener.newGameAivAiPressed() );
         sidePanel.add(newGameButton_AivAi);
+
+        //fileChooser = new JFileChooser("./");
+        fileChooser = new FileChooser();
+        GameButton saveGameButton = new GameButton("Save Game");
+        saveGameButton.addActionListener(fileChooser);
+        sidePanel.add(saveGameButton);
 
         logArea = new JTextArea(10, 30); //rows, 30 long
         logArea.setEditable(false);
@@ -91,18 +99,17 @@ public final class GuiMainFrame extends JFrame{
         topGoalPanel = new CellPanel(new Pos(Player.TOP));
         topContainer = new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
         topContainer.setOpaque(false);
-        topGoalPanel.setPreferredSize(new Dimension(Params.TILESIZE,Params.TILESIZE));
+        topGoalPanel.setPreferredSize(new Dimension(Params.WIDTH,Params.TILESIZE));
         topContainer.add(topGoalPanel);
         bottomGoalPanel = new CellPanel(new Pos(Player.BOTTOM));
         bottomContainer = new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
         bottomContainer.setOpaque(false);
-        bottomGoalPanel.setPreferredSize(new Dimension(Params.TILESIZE,Params.TILESIZE));
+        bottomGoalPanel.setPreferredSize(new Dimension(Params.WIDTH,Params.TILESIZE));
         bottomContainer.add(bottomGoalPanel);
         
 
         boardPanel = new JPanel();
         boardPanel.setBackground(Params.BOARDCOLOR);
-        //boardPanel.setPreferredSize(new Dimension(width+2*borderSize,height+2*borderSize));
         boardPanel.setBounds(0,0,Params.WIDTH+2*Params.BORDERSIZE,Params.HEIGHT+2*Params.BORDERSIZE);
         boardPanel.setLayout(new BorderLayout(0,Params.GAPSIZE));
         boardPanel.setBorder(BorderFactory.createEmptyBorder(Params.BORDERSIZE, Params.BORDERSIZE, Params.BORDERSIZE, Params.BORDERSIZE));

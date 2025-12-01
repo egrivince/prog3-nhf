@@ -3,20 +3,12 @@ package org.example;
 import java.awt.dnd.DragGestureEvent;
 
 public class Tile {
-    //private int col;
-    //private int row;
     private Pos pos;
-    //private Player playerEndTile; //is TOP if the tile is the top players extra tile, BOTTOM if the tile is the bottom players, null else
     private Piece piece;
 
     public Tile(Pos pos) {
-        //this.col=col;
-        //this.row=row;
         this.pos = pos;
     }
-    /*public Tile(Player player) {
-        playerEndTile = player;
-    }*/
 
     public static boolean areAdjacentTiles(Tile tile1, Tile tile2) {
         int dCol = Math.abs(tile1.getCol() - tile2.getCol());

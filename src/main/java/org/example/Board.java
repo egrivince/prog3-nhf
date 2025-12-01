@@ -57,6 +57,7 @@ public class Board implements BoardReadOnly{
         
     }
 
+    @Override
     public int activeRow(Player player) {
         if(player == Player.TOP) { //top player
             for(int row=0; row<6; row++) {
@@ -101,14 +102,27 @@ public class Board implements BoardReadOnly{
         return bottomGoalTile;
     }
 
+    @Override
     public List<Tile> neighborTilesList(Tile tile) {
-        if(tile.getRow() == Pos.COL_SPEC) return null;
+        if(tile.getRow() == Pos.COL_SPEC) return null; //no need for this, you can only move in, not out of the goal tile
         List<Tile> neighborTilesList = new ArrayList<>();
         List<Pos> neighborPosList = Pos.neighborPosList(tile.getPos());
-        for(Pos p : neighborPosList) {
-            neighborTilesList.add(getTile(p));
+        for(Pos pos : neighborPosList) {
+            neighborTilesList.add(getTile(pos));
         }
         return neighborTilesList;
+    }
+
+    @Override
+    public List<Piece> activeRowPieces(Player player) {
+        List<Piece> activeRowPieces = new ArrayList<>();
+        for(int col=0; col<6; col++) {
+            Tile tile = getTile(Pos.at(activeRow(player), col));
+            if(tile.getPiece() != null) {
+                activeRowPieces.add(tile.getPiece());
+            }
+        }
+        return activeRowPieces;
     }
 
 

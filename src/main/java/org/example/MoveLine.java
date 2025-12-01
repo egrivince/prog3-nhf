@@ -2,6 +2,7 @@ package org.example;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,21 +10,17 @@ import javax.swing.JComponent;
 
 public class MoveLine extends JComponent{
     
-    //private List<Point> endPoints;
     private List<List<Point>> segmentList;
     private Color lineColor = new Color(255,0,0,150);
 
     public MoveLine() {
-        //endPoints = new ArrayList<>();
         segmentList = new ArrayList<>();
     }
 
     public void addPoint(Point point) {
-        //endPoints.add(point);
         segmentList.getLast().add(point);
     }
     public void clearPoints() {
-        //endPoints.clear();
         segmentList.clear();
         this.newLineSegment();
     }
@@ -49,14 +46,20 @@ public class MoveLine extends JComponent{
         g2d.setColor(lineColor);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        Path2D path = new Path2D.Double();
+
         for(List<Point> segment : segmentList) {
+            if(segment.isEmpty()) continue;
+            path.moveTo(segment.get(0).x, segment.get(0).y);
             for(int ind=1; ind<segment.size(); ind++) {
                 Point from = segment.get(ind-1);
                 Point to = segment.get(ind);
-                Line2D.Double line = new Line2D.Double(from.x, from.y, to.x, to.y);
-                g2d.draw(line);
+                //Line2D.Double line = new Line2D.Double(from.x, from.y, to.x, to.y);
+                path.lineTo(to.x, to.y);
+                //g2d.draw(line);
             }
         }
+        g2d.draw(path);
     }
 
     public void setColor(Color color) {

@@ -1,12 +1,12 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.text.StyledEditorKit;
-
-public class GameManager implements GuiListener {
+public class GameManager implements GuiListener, Serializable{
     private GameListener gameListener;
     public void setgameListener(GameListener l) {
         gameListener = l;
@@ -15,11 +15,11 @@ public class GameManager implements GuiListener {
     private Board board;
     private Move currentMove;
     private Player currentPlayer;
-    private GameMode gameMode = GameMode.P_vs_P;
+    private GameMode gameMode = GameMode.P_vs_Ai;
     private boolean gameOver;
     
     public GameManager() {
-
+        
     }
 
     public void newGame() {
@@ -28,6 +28,7 @@ public class GameManager implements GuiListener {
         board.boardStartPosition();
         board.print();
         currentPlayer = Player.BOTTOM;
+        currentMove = null;
         gameOver = false;
         gameListener.setActiveRow(Player.BOTTOM, 5); //bottom player;
         gameListener.setActiveRow(Player.TOP, 0); //top player;
@@ -39,9 +40,7 @@ public class GameManager implements GuiListener {
             new Thread(() -> {
                 while (true) { 
                     
-                    try {
-                        Thread.sleep(500);
-                    } catch (Exception e) {}
+                    
                     ThinkingMachine thinkingMachineBottom = new ThinkingMachine(board, Player.BOTTOM);
                     currentMove = thinkingMachineBottom.getBestMove();
                     executeAiMove();
@@ -50,9 +49,7 @@ public class GameManager implements GuiListener {
                     if(manageWin()) break;
     
     
-                    try {
-                        Thread.sleep(500);
-                    } catch (Exception e) {}
+                    
                     ThinkingMachine thinkingMachineTop = new ThinkingMachine(board, Player.TOP);
                     currentMove = thinkingMachineTop.getBestMove();
                     executeAiMove();
@@ -63,17 +60,6 @@ public class GameManager implements GuiListener {
             }).start();
 
         }
-
-
-
-        /*ThinkingMachine tm = new ThinkingMachine(board);
-        List<MoveSegment> l = tm.legalMoveSegments(board.getTile(Pos.at(0,3)).getPiece(), new HashSet<>());
-        for(MoveSegment ms : l) {
-            for(Tile t : ms.getTiles()) {
-                System.out.print(t+"_");
-            }
-            System.out.println("");
-        }*/
         
     }
 
@@ -89,11 +75,11 @@ public class GameManager implements GuiListener {
                 gameListener.logMessage("TOP WINS!");
             }
             gameOver = true;
+            newGameAivAiPressed();//just for testing for now
             return true;
         }
         return false;
     }
-
     public Player checkWin() {
         if(board.getBottomGoalTile().getPiece() != null) { //if the bottom goal tile is occupied by a piece, top wins
             return Player.TOP;
@@ -103,12 +89,24 @@ public class GameManager implements GuiListener {
         }
         return null;
     }
+    
     public Board getBoard() {
         return board;
     }
     public Player nextPlayer() {
         if(currentPlayer == Player.BOTTOM) return Player.TOP;
         else return Player.BOTTOM;
+    }
+    
+    public boolean noLegalMoves() {
+        ThinkingMachine tm = new ThinkingMachine(board, currentPlayer);
+        for(Piece piece : board.activeRowPieces(currentPlayer)) {
+            List<MoveSegment> moveSegmentsList = tm.legalMoveSegments(piece, piece.getTile(), new HashSet<>());
+            if(!moveSegmentsList.isEmpty()) { //if there is a legal movesemgent from the piece, there is a legal move
+                return false;
+            }
+        }
+        return true; //all movesegmentslists are empty, no legal moves, the turn must be passed
     }
 
     public void nextTurn() { //if its player vs player 
@@ -143,38 +141,32 @@ public class GameManager implements GuiListener {
             System.out.println("not on the active row, but on row "+currentMove.getPiece().getTile().getRow()+", illegal move for player"+currentPlayer);
             currentMove = null;
             gameListener.startNewDrag();
-            gameListener.boardChanged(board); //to update the tiles being transparent even if the move was legal but by the wrong piece
+            gameListener.boardChanged(board, Arrays.asList(currentMove.from(), currentMove.to())); //to update the tiles being transparent even if the move was legal but by the wrong piece
             return;
         }
 
         //the move is valid from here
-        Tile endTile = currentMove.getLastMoveSegment().getTiles().getLast();
-        Tile tempTile = new Tile(Pos.at(-2, -2)); //has nothing to do with the board, just to not mess up piece swaps
+        Tile endTile = currentMove.getLastMoveSegment().getLastTile();
+        Tile tempTile = new Tile(Pos.at(-10, -10)); //has nothing to do with the board, just to not mess up piece swaps
         if(currentMove.getKnockTile() == null) { //its just a normal move with jumping
             board.movePiece(currentMove.getPiece(), endTile);
+            gameListener.boardChanged(board, Arrays.asList(currentMove.from(), currentMove.to()));
         }
         else { //its a move with jumping and knocking
             board.movePiece(endTile.getPiece(), tempTile);
             board.movePiece(currentMove.getPiece(), endTile);
             board.movePiece(tempTile.getPiece(), currentMove.getKnockTile());
+            gameListener.boardChanged(board, Arrays.asList(currentMove.from(), currentMove.to(), currentMove.getKnockTile().getPos()));
         }
         
         Player winnerPlayer = checkWin();
         if(winnerPlayer != null) {
-            if(winnerPlayer == Player.BOTTOM) {
-                System.out.println("BOTTOM WINS!");
-                gameListener.logMessage("BOTTOM WINS!");
-            }
-            else if(winnerPlayer == Player.TOP) {
-                System.out.println("TOP WINS!");
-                gameListener.logMessage("TOP WINS!");
-            }
             gameOver = true;
         }
 
-        board.print();
+        //board.print();
         //currentMove.debuglists();
-        gameListener.boardChanged(board);
+        
         gameListener.setActiveRow(nextPlayer(), board.activeRow(nextPlayer()));
         gameListener.setActiveRow(currentPlayer, board.activeRow(currentPlayer));
         if(!gameOver) {
@@ -185,9 +177,15 @@ public class GameManager implements GuiListener {
     }
 
     public void executeAiMove() {
+        System.out.println("-ai: "+currentPlayer);
+        currentMove.printMove();
+        System.out.println("--------");
+        try {
+            Thread.sleep(80);
+        } catch (Exception e) {}
         gameListener.setLineColors(currentPlayer);
+        gameListener.startNewDrag();
         for(MoveSegment moveSegment : currentMove.getMoveSegmentList()) {
-            gameListener.startNewDrag();
             for(Tile tile : moveSegment.getTiles()) {
                 gameListener.addTileDragged(tile.getPos());
             }
@@ -210,7 +208,7 @@ public class GameManager implements GuiListener {
     public void clickedOnTile(Pos pos) {
         if(gameOver) return;
 
-        System.out.println("("+pos.row+","+pos.col+") clicked using listener interface");
+        //System.out.println("("+pos.row+","+pos.col+") clicked using listener interface");
 
         if(currentMove == null) { //clicking only matters if there is already a piece jumping over another piece waiting for the move to be continued or the piece knocked out
             return;
@@ -252,7 +250,6 @@ public class GameManager implements GuiListener {
                 //System.out.println("move from an empty tile!");
                 return;
             }
-            //board.getTile(row, col).setPiece(null); //set the tile's piece to null so it counts as empty, but the piece's tile stays so i can read that
             if(!board.isPieceActive(draggedTile.getPiece(), currentPlayer)) {
                 return;
             }
@@ -261,15 +258,19 @@ public class GameManager implements GuiListener {
             gameListener.startNewDrag();
             gameListener.setLineColors(currentPlayer);
             gameListener.moveStarted(pos);
+            
+            //board.movePiece(draggedTile.getPiece(), tempTile); //move the piece to the temp tile, so the start tile counts as empty from now
+            //draggedTile.setPiece(null); //set the tile's piece to null so it counts as empty, but the piece's tile stays so i can read that
         }
         
+
         if(currentMove.getLastMoveSegment().isTilesEmpty()) { //if its a new movesegment, start a new line on the screen so the line doesnt jump (only for looks, the move would be illegal anyway)
             gameListener.newDragSegment();
         }
         //start of the new moveSegment or entered a new tile
         if(currentMove.getLastMoveSegment().isTilesEmpty() || currentMove.getLastMoveSegment().getTiles().getLast() != draggedTile) { 
             currentMove.addTileToLast(draggedTile);
-            System.out.println("----------------------------------------added tile to drag:"+pos.row+"_"+pos.col);
+            //System.out.println("----------------------------------------added tile to drag:"+pos.row+"_"+pos.col);
             gameListener.addTileDragged(pos);
         }
     }
@@ -281,11 +282,11 @@ public class GameManager implements GuiListener {
         }
         if(currentMove.getLastMoveSegment().getTiles().getLast() != board.getTile(pos)) {
             if(pos.row == Pos.BOTTOMGOAL) { //bottom player
-                System.out.println("added bottom tile to drag");
+                //System.out.println("added bottom tile to drag");
                 currentMove.addTileToLast(board.getBottomGoalTile());
             }
             else { //top player
-                System.out.println("added top tile to drag");
+                //System.out.println("added top tile to drag");
                 currentMove.addTileToLast(board.getTopGoalTile());
             }
             gameListener.addTileDragged(pos);
@@ -299,24 +300,23 @@ public class GameManager implements GuiListener {
         if(gameOver) return;
         //System.out.println("mouse drag released");
         if(currentMove == null) { //
-            System.out.println("empty move");
+            //System.out.println("empty move");
             return;
         }
-        if(/*!currentMove.getLastMoveSegment().isValid()*/!currentMove.isValid()) {
+        if(!currentMove.isValid()) {
             System.out.println("abort move not executed, new move started");
-            gameListener.logMessage("move not executed, new move started");
+            gameListener.logMessage("illegal move");
             failedMouseDragRelease();
             return;
         }
         
         if(currentMove.getLastMoveSegment().getLastTile().getPiece() == null) { //if the last tile was empty
             manageTurn();
-            
         }
         else { //if there was already a piece on the last tile
             if(currentMove.getPiece().getTile() == currentMove.getLastMoveSegment().getLastTile()) { //if the piece looped back to its original place, it doesnt count as a tile with a piece on it
                 manageTurn();
-                System.out.println("looped back");
+                //System.out.println("looped back");
                 gameListener.logMessage("looped back");
             }
             else {
@@ -328,11 +328,12 @@ public class GameManager implements GuiListener {
 
     @Override
     public void failedMouseDragRelease() {
+        if(currentMove == null) return;
         if(gameOver) return;
         System.out.println("failed mouse drag release");
-        currentMove = null;
+        gameListener.boardChanged(board, Arrays.asList(currentMove.from())); //only update the starting tile
         gameListener.startNewDrag();
-        gameListener.boardChanged(board);
+        currentMove = null;
     }
 
     @Override

@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.LogManager;
 
 public final class GuiManager implements GameListener {
@@ -85,6 +86,25 @@ public final class GuiManager implements GameListener {
                 cp.repaint();
         }
     }
+
+    @Override
+    public void boardChanged(BoardReadOnly board, List<Pos> changed) {
+        for(Pos p : changed) {
+
+            CellPanel cp = getCellPanel(p);
+            cp.removeAll();
+            Piece piece = board.getTile(p).getPiece();
+            if(piece != null) {
+                PieceLabel pl = new PieceLabel(piece.getType());
+                cp.add(pl);
+                
+                //System.out.println("pl added"+i+j);
+            }
+            cp.revalidate();
+            cp.repaint();
+        }
+    }
+
 
     @Override
     public void addTileDragged(Pos pos) {

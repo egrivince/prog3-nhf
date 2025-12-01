@@ -10,7 +10,7 @@ public class MoveSegment {
     private Piece piece;
     private int moveLength;
 
-    public MoveSegment() {
+    public MoveSegment(/*Piece piece*/) {
         tiles = new ArrayList<>();
     }
 
@@ -41,6 +41,13 @@ public class MoveSegment {
 
         return true;
     }*/
+    public void printMovesegment() {
+        for(Tile t : tiles) {
+            System.out.print(t+"_");
+        }
+    }
+
+
     public Set<Set<Tile>> tilePairs() {
         Set<Set<Tile>> tilePairsList = new HashSet<>();
         int size = tiles.size();
@@ -52,6 +59,13 @@ public class MoveSegment {
         }
         return tilePairsList;
 
+    }
+
+    public boolean endWin() {
+        return getLastTile().getCol() == Pos.COL_SPEC;
+    }
+    public boolean jumpAgain() {
+        return getLastTile().getPiece() != null && getLastTile() != piece.getTile();
     }
 
 

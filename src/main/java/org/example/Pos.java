@@ -7,7 +7,7 @@ import java.util.List;
 public class Pos {
     public static final int TOPGOAL = -1;
     public static final int BOTTOMGOAL = 6;
-    public static final int COL_SPEC = -1;
+    public static final int COL_SPEC = -99; //it cant be -1 bc that messes up the left direction method
 
     public final int row;
     public final int col;
@@ -35,26 +35,38 @@ public class Pos {
     }
     
 
-
+    public boolean outOfBoard() {
+        if(col == COL_SPEC) return false;
+        return (col < 0 || 5 < col || row < 0 || 5 < row);
+    }
+    public Pos goalTileCheck() {
+        if(row == TOPGOAL) return new Pos(Player.TOP);
+        else if(row == BOTTOMGOAL) return new Pos(Player.BOTTOM);
+        return this;
+    }
 
     public static Pos up(Pos pos) {
         Pos p = new Pos(pos.row-1, pos.col);
-        if(p.col < 0 || 5 < p.col || p.row < 0 || 5 < p.row) return null;
+        p = p.goalTileCheck();
+        if(p.outOfBoard()) return null;
         return p;
     }
     public static Pos down(Pos pos) {
         Pos p = new Pos(pos.row+1, pos.col);
-        if(p.col < 0 || 5 < p.col || p.row < 0 || 5 < p.row) return null;
+        p = p.goalTileCheck();
+        if(p.outOfBoard()) return null;
         return p;
     }
     public static Pos right(Pos pos) {
         Pos p = new Pos(pos.row, pos.col+1);
-        if(p.col < 0 || 5 < p.col || p.row < 0 || 5 < p.row) return null;
+        p = p.goalTileCheck();
+        if(p.outOfBoard()) return null;
         return p;
     }
     public static Pos left(Pos pos) {
         Pos p = new Pos(pos.row, pos.col-1);
-        if(p.col < 0 || 5 < p.col || p.row < 0 || 5 < p.row) return null;
+        p = p.goalTileCheck();
+        if(p.outOfBoard()) return null;
         return p;
     }
 

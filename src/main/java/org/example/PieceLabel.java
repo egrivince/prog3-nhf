@@ -13,12 +13,16 @@ public class PieceLabel extends JLabel{
 
         this.setPreferredSize(new Dimension(50,50));
         this.setFont(new Font("Arial", Font.BOLD, 30));
-        this.setText(Integer.toString(type));
+        this.setText(Integer.toString(this.type));
         this.setHorizontalAlignment(JLabel.CENTER);
         this.setVerticalAlignment(JLabel.CENTER);
         this.setBackground(Params.PIECE_COLOR);
         this.setOpaque(true);
         this.setFocusable(false);
         this.setEnabled(false);
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

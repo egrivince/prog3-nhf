@@ -22,10 +22,18 @@ public class Move {
         this.tilePairsList = new ArrayList<>();
     }
 
+    public Move(Move other) {
+        this.player = other.player;
+        this.piece = other.piece;
+
+        this.moveSegmentList = new ArrayList<>(other.moveSegmentList);
+        this.tilePairsList = new ArrayList<>(other.tilePairsList);
+    }
+
     public boolean isValidFinal() {
         if(!isValid()) return false;
         //check if the move ends on an empty tile or there was a knocked tile
-        if(knockTile == null && getLastMoveSegment().getLastTile().getPiece() != null) {
+        if(knockTile == null && getLastMoveSegment().getLastTile().getPiece() != null && piece.getTile() != getLastMoveSegment().getLastTile()) {
             System.out.println("you cant end the move on a tile, you have to move again");
             return false;
         }
@@ -119,6 +127,7 @@ public class Move {
             
         
     }
+    
     public void startNewSegment() {
         MoveSegment lastSegment = getLastMoveSegment(); //null if its the first segment!
 
@@ -138,10 +147,14 @@ public class Move {
 
     public void addAllMovesegments(List<MoveSegment> moveSegmentsList) {
         for(MoveSegment moveSegment : moveSegmentsList) {
-            startNewSegment();
-            for(Tile tile : moveSegment.getTiles()) {
-                addTileToLast(tile);
-            }
+            addMovesegment(moveSegment);
+        }
+    }
+
+    public void addMovesegment(MoveSegment moveSegment) {
+        startNewSegment();
+        for(Tile tile : moveSegment.getTiles()) {
+            addTileToLast(tile);
         }
     }
     
@@ -173,13 +186,27 @@ public class Move {
             System.out.println("");
         }*/
     }
+    
     public void printMove() {
         for(MoveSegment ms : moveSegmentList) {
-            for(Tile t : ms.getTiles()) {
-                System.out.print(t+"_");
-            }
+            ms.printMovesegment();
             System.out.println("");
         }
     }
 
+    public Set<Set<Tile>> tilePairs() {
+        Set<Set<Tile>> tilePairs = new HashSet<>();
+        for(MoveSegment moveSegment : moveSegmentList) {
+            tilePairs.addAll(moveSegment.tilePairs());
+        }
+        return tilePairs;
+    }
+
+    public Pos to() {
+        return getLastMoveSegment().getLastTile().getPos();
+    }
+
+    public Pos from() {
+        return moveSegmentList.getFirst().getTiles().getFirst().getPos();
+    }
 }
